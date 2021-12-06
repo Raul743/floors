@@ -1,0 +1,58 @@
+version: '3.7'
+
+services:
+  app:
+    container_name: app
+    build: .
+    ports:
+      - 3000:3000
+    networks:
+      - network
+    env_file:
+      - .env
+    volumes:
+      - app:/usr/src/app/data
+    depends_on:
+      - flavors-redis
+    links:
+      - flavors-redis
+
+  flavors-postgres:
+    image: postgres:13
+    container_name: flavors-postgres
+    restart: always
+    hostname: hpostgres
+    ports:
+      - 5432:5432
+    env_file:
+      - .env
+    environment:
+      PGDATA: /var/lib/postgresql/data/flavors-db/
+    volumes:
+      - postgres:/usr/src/app/data
+    networks:
+      - network
+
+  flavors-redis:
+    image: 'redis'
+    container_name: flavors-redis
+    env_file:
+      - .env
+    ports:
+      - 6379:6379
+    volumes:
+      - redis:/usr/src/app/data
+    networks:
+      - network
+
+volumes:
+  postgres:
+    name: flavors-db
+  redis:
+    name: flavors-redis
+  app:
+    name: flavors-app
+
+networks:
+  network:
+    name: flavors-network
